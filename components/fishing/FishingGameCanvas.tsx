@@ -24,14 +24,22 @@ export function FishingGameCanvas() {
 
   const [isHolding, setIsHolding] = useState(false);
 
+  // Determine if we're in practice mode
+  const isPracticeMode = !blockchain.isReady;
+
+  // Check if wallet has insufficient funds for VRF fee (only relevant when logged in)
+  const hasInsufficientBalance = !isPracticeMode &&
+    blockchain.balance !== undefined &&
+    blockchain.fee !== undefined &&
+    blockchain.balance.value < blockchain.fee;
+
   // Refs for game loop to avoid recreating callback every frame
   const stateRef = useRef(state);
   const isHoldingRef = useRef(isHolding);
+  const insufficientBalanceRef = useRef(hasInsufficientBalance);
   stateRef.current = state;
   isHoldingRef.current = isHolding;
-
-  // Determine if we're in practice mode
-  const isPracticeMode = !blockchain.isReady;
+  insufficientBalanceRef.current = hasInsufficientBalance;
 
   // Initialize renderer
   useEffect(() => {
@@ -210,7 +218,9 @@ export function FishingGameCanvas() {
       }
 
       // Render
-      rendererRef.current?.render(currentState, deltaTime);
+      rendererRef.current?.render(currentState, deltaTime, {
+        insufficientBalance: insufficientBalanceRef.current,
+      });
     },
     [dispatch]
   );

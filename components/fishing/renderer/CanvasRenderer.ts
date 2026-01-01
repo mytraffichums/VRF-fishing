@@ -59,7 +59,7 @@ export class CanvasRenderer {
     this.offsetY = (windowHeight - GAME_HEIGHT * this.scale) / 2;
   }
 
-  render(state: GameStateData, deltaTime: number) {
+  render(state: GameStateData, deltaTime: number, options?: { insufficientBalance?: boolean }) {
     this.time += deltaTime;
     this.waveOffset = this.time / 500;
 
@@ -77,6 +77,13 @@ export class CanvasRenderer {
     // Draw layers
     this.drawSky();
     this.drawWater();
+
+    // Show insufficient balance overlay if needed (blocks normal gameplay UI)
+    if (options?.insufficientBalance) {
+      this.drawInsufficientBalanceOverlay();
+      ctx.restore();
+      return;
+    }
 
     // Draw game elements based on state
     if (state.state !== "idle" && state.state !== "casting") {
@@ -453,6 +460,62 @@ export class CanvasRenderer {
     ctx.font = "14px monospace";
     ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
     ctx.fillText("Hold to reel in your catch", 0, 35);
+
+    ctx.restore();
+  }
+
+  private drawInsufficientBalanceOverlay() {
+    const ctx = this.ctx;
+    const centerX = GAME_WIDTH / 2;
+    const centerY = GAME_HEIGHT * 0.45;
+
+    // Dark overlay
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Pulsing animation
+    const pulse = 1 + Math.sin(this.time / 200) * 0.03;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(pulse, pulse);
+
+    // Warning box background
+    ctx.fillStyle = "rgba(180, 83, 9, 0.9)";
+    ctx.beginPath();
+    ctx.roundRect(-120, -70, 240, 140, 12);
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = "#F59E0B";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Warning icon (triangle with !)
+    ctx.fillStyle = "#FCD34D";
+    ctx.beginPath();
+    ctx.moveTo(0, -45);
+    ctx.lineTo(-20, -15);
+    ctx.lineTo(20, -15);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#78350F";
+    ctx.font = "bold 18px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("!", 0, -27);
+
+    // Main text
+    ctx.fillStyle = "#FEF3C7";
+    ctx.font = "bold 18px monospace";
+    ctx.fillText("INSUFFICIENT", 0, 10);
+    ctx.fillText("BALANCE", 0, 32);
+
+    // Subtitle
+    ctx.font = "12px monospace";
+    ctx.fillStyle = "#FDE68A";
+    ctx.fillText("Fund wallet to play", 0, 55);
 
     ctx.restore();
   }
