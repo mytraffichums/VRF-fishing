@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import { parseEther, isAddress } from "viem";
 import { useGameState } from "./hooks/useGameState";
 import { useGameLoop } from "./hooks/useGameLoop";
 import {
@@ -23,6 +25,64 @@ export function FishingGameCanvas() {
   const blockchain = useBlockchainFishing();
 
   const [isHolding, setIsHolding] = useState(false);
+
+  // Send funds modal state
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [sendTo, setSendTo] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  // Send transaction hook
+  const {
+    sendTransaction,
+    data: sendTxHash,
+    isPending: isSendPending,
+    error: sendTxError,
+    reset: resetSendTx,
+  } = useSendTransaction();
+
+  const { isLoading: isSendConfirming, isSuccess: isSendSuccess } = useWaitForTransactionReceipt({
+    hash: sendTxHash,
+  });
+
+  // Reset modal on successful send
+  useEffect(() => {
+    if (isSendSuccess) {
+      setSendTo("");
+      setSendAmount("");
+      setSendError(null);
+      // Close modal after a brief delay to show success
+      setTimeout(() => {
+        setShowSendModal(false);
+        resetSendTx();
+      }, 2000);
+    }
+  }, [isSendSuccess, resetSendTx]);
+
+  // Handle send transaction
+  const handleSend = useCallback(() => {
+    setSendError(null);
+
+    if (!isAddress(sendTo)) {
+      setSendError("Invalid recipient address");
+      return;
+    }
+
+    const amount = parseFloat(sendAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setSendError("Invalid amount");
+      return;
+    }
+
+    try {
+      sendTransaction({
+        to: sendTo as `0x${string}`,
+        value: parseEther(sendAmount),
+      });
+    } catch {
+      setSendError("Failed to send transaction");
+    }
+  }, [sendTo, sendAmount, sendTransaction]);
 
   // Determine if we're in practice mode
   const isPracticeMode = !blockchain.isReady;
@@ -559,16 +619,123 @@ export function FishingGameCanvas() {
 
             {/* Balance */}
             {blockchain.balance && (
-              <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                <span className="text-sm text-gray-400">Balance</span>
-                <span className="text-sm font-medium text-white">
-                  {parseFloat(blockchain.balance.formatted).toFixed(4)} {blockchain.balance.symbol}
-                </span>
+              <div className="pt-2 border-t border-gray-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Balance</span>
+                  <span className="text-sm font-medium text-white">
+                    {parseFloat(blockchain.balance.formatted).toFixed(4)} {blockchain.balance.symbol}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSendModal(true)}
+                  className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                  Send Funds
+                </button>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Send Funds Modal */}
+      {showSendModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-5 w-full max-w-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Send Funds</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSendModal(false);
+                  setSendTo("");
+                  setSendAmount("");
+                  setSendError(null);
+                  resetSendTx();
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {isSendSuccess ? (
+              <div className="text-center py-4">
+                <div className="text-green-400 text-4xl mb-2">✓</div>
+                <p className="text-green-400 font-medium">Transaction Sent!</p>
+                <a
+                  href={`${BLOCK_EXPLORER_URL}/tx/${sendTxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 text-sm hover:underline"
+                >
+                  View on explorer
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Recipient Address</label>
+                    <input
+                      type="text"
+                      value={sendTo}
+                      onChange={(e) => setSendTo(e.target.value)}
+                      placeholder="0x..."
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm font-mono placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      disabled={isSendPending || isSendConfirming}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Amount (MON)</label>
+                    <input
+                      type="number"
+                      value={sendAmount}
+                      onChange={(e) => setSendAmount(e.target.value)}
+                      placeholder="0.0"
+                      step="0.0001"
+                      min="0"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      disabled={isSendPending || isSendConfirming}
+                    />
+                    {blockchain.balance && (
+                      <button
+                        type="button"
+                        onClick={() => setSendAmount(blockchain.balance!.formatted)}
+                        className="text-xs text-blue-400 hover:text-blue-300 mt-1"
+                        disabled={isSendPending || isSendConfirming}
+                      >
+                        Max: {parseFloat(blockchain.balance.formatted).toFixed(4)} MON
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {(sendError || sendTxError) && (
+                  <div className="p-2 bg-red-900/50 border border-red-700 rounded-lg">
+                    <p className="text-red-300 text-sm">{sendError || sendTxError?.message?.slice(0, 100)}</p>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={isSendPending || isSendConfirming || !sendTo || !sendAmount}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                >
+                  {isSendPending ? "Confirm in wallet..." : isSendConfirming ? "Sending..." : "Send"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
