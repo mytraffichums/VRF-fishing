@@ -36,15 +36,6 @@ No on-chain cost for failed attempts — only successful catches trigger the VRF
 - **Next.js** — React framework
 - **wagmi** — Ethereum hooks
 
-## Getting Started
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to play.
-
 ## Acknowledgments
 
 This project is based on [missionx-example-app](https://github.com/portdeveloper/missionx-example-app) by portdeveloper.
