@@ -468,6 +468,16 @@ export function FishingGameCanvas() {
           </div>
         )}
 
+        {/* Insufficient balance warning */}
+        {!isPracticeMode && blockchain.balance && blockchain.fee && blockchain.balance.value < blockchain.fee && (
+          <div className="p-3 bg-orange-900/50 border border-orange-700/50 rounded-lg text-center">
+            <p className="text-sm text-orange-300 font-medium mb-1">Insufficient Balance</p>
+            <p className="text-xs text-orange-400">
+              Fund your wallet to play on-chain. Need at least {(Number(blockchain.fee) / 1e18).toFixed(6)} MON for VRF fees.
+            </p>
+          </div>
+        )}
+
         {/* Catch History */}
         {state.catches.length > 0 && (
           <div className="space-y-2">
