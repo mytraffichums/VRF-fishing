@@ -74,13 +74,6 @@ export class CanvasRenderer {
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
 
-    // Apply screen shake during fish fighting (reduced intensity)
-    if (state.state === "reeling" && state.fishIsFighting) {
-      const shakeX = Math.sin(this.time / 30) * 1.5;
-      const shakeY = Math.cos(this.time / 25) * 1;
-      ctx.translate(shakeX, shakeY);
-    }
-
     // Draw layers
     this.drawSky();
     this.drawWater();
