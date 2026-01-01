@@ -77,7 +77,7 @@ export const GAMEPLAY = {
   TENSION_HIGH_THRESHOLD: 70,
 
   // Progress
-  PROGRESS_HOLD_DIVISOR: 80, // dt/80 when holding
+  PROGRESS_HOLD_DIVISOR: 56, // dt/56 when holding (30% faster than original)
 
   // Fish fighting (matching reference)
   FISH_FIGHT_INITIAL_MIN: 500, // Initial delay before first fight

@@ -357,7 +357,7 @@ export function FishingGameCanvas() {
             </div>
             <div className="mt-2 p-2 bg-yellow-900/30 rounded border border-yellow-700/50">
               <p className="text-yellow-300 text-xs">
-                <span className="font-bold">💰 Staking:</span> Practice mode only. Bet tokens on each cast — win big on RARE and LEGENDARY catches!
+                <span className="font-bold">💰 Staking:</span> Coming soon! On-chain staking will be implemented in a future update.
               </p>
             </div>
           </div>
@@ -634,7 +634,7 @@ export function FishingGameCanvas() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Send Funds
+                  Withdraw
                 </button>
               </div>
             )}
@@ -647,7 +647,7 @@ export function FishingGameCanvas() {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-xl p-5 w-full max-w-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Send Funds</h3>
+              <h3 className="text-lg font-bold text-white">Withdraw</h3>
               <button
                 type="button"
                 onClick={() => {

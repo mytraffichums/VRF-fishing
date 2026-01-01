@@ -11,7 +11,7 @@ A fishing game with provably fair on-chain randomness using Pyth Entropy on Mona
 
 > **During Fights:** Keep tension in the green ZONE or lose progress!
 
-> **Staking:** Practice mode only. Bet tokens on each cast — win big on RARE and LEGENDARY catches!
+> **Staking:** Coming soon! On-chain staking will be implemented in a future update.
 
 ## Pyth Entropy VRF
 
