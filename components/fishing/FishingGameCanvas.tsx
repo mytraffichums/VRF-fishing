@@ -61,9 +61,13 @@ export function FishingGameCanvas() {
       setIsHolding(true);
 
       if (state.state === "idle") {
-        // On-chain mode: block if not enough balance
-        if (!isPracticeMode && state.balance < state.stake) {
-          return; // Can't cast without enough balance in on-chain mode
+        // On-chain mode: block if wallet has insufficient funds for VRF fee
+        if (!isPracticeMode) {
+          const walletBalance = blockchain.balance?.value ?? BigInt(0);
+          const requiredFee = blockchain.fee ?? BigInt(0);
+          if (walletBalance < requiredFee) {
+            return; // Can't play without funds to cover VRF fee
+          }
         }
         // Start casting - NO blockchain call yet!
         dispatch({ type: "START_CAST" });
@@ -81,7 +85,7 @@ export function FishingGameCanvas() {
         requestedRandomRef.current = false;
       }
     },
-    [state.state, state.resultTimer, state.balance, state.stake, isPracticeMode, dispatch, blockchain]
+    [state.state, state.resultTimer, isPracticeMode, dispatch, blockchain]
   );
 
   // Handle input end
