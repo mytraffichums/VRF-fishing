@@ -757,38 +757,47 @@ export class CanvasRenderer {
     const centerY = GAME_HEIGHT * 0.4;
 
     // Dark overlay
-    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    // Spinning indicator
-    const spinAngle = this.time / 200;
-    ctx.save();
-    ctx.translate(centerX, centerY - 30);
-    ctx.rotate(spinAngle);
+    // Pulsing effect for attention
+    const pulse = 1 + Math.sin(this.time / 150) * 0.05;
 
-    ctx.strokeStyle = "#9333EA";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(pulse, pulse);
+
+    // "STOP CLICKING" warning - prominent
+    ctx.fillStyle = "#FCD34D";
+    ctx.font = "bold 28px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("STOP CLICKING!", 0, -40);
+
+    // Hand/stop icon (simple circle with hand)
+    ctx.strokeStyle = "#FCD34D";
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(0, 0, 25, 0, Math.PI * 1.5);
+    ctx.arc(0, 20, 30, 0, Math.PI * 2);
     ctx.stroke();
+
+    // Palm icon inside
+    ctx.fillStyle = "#FCD34D";
+    ctx.font = "bold 30px monospace";
+    ctx.fillText("✋", 0, 22);
 
     ctx.restore();
 
-    // "Determining catch..." text with animated dots
+    // Subtext with animated dots
     const dots = Math.floor((this.time / 400) % 4);
-    const text = "Determining catch" + ".".repeat(dots);
-
-    ctx.fillStyle = "#A855F7";
-    ctx.font = "bold 22px monospace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "16px monospace";
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, centerX, centerY + 30);
+    ctx.fillText("Wallet prompt incoming" + ".".repeat(dots), centerX, centerY + 80);
 
-    // Subtext
-    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-    ctx.font = "14px monospace";
-    ctx.fillText("Waiting for on-chain result...", centerX, centerY + 60);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = "12px monospace";
+    ctx.fillText("Sign to reveal your catch", centerX, centerY + 105);
   }
 
   private drawCaughtFish(state: GameStateData) {

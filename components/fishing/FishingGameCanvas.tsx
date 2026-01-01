@@ -144,8 +144,11 @@ export function FishingGameCanvas() {
       const random = generatePracticeRandom();
       dispatch({ type: "SET_RANDOM", result: random, sequenceNumber: null });
     } else {
-      // On-chain mode: request from Pyth
-      blockchain.requestRandom();
+      // On-chain mode: 2 second delay before wallet prompt to prevent accidental dismissal
+      const timeout = setTimeout(() => {
+        blockchain.requestRandom();
+      }, 2000);
+      return () => clearTimeout(timeout);
     }
   }, [state.state, isPracticeMode, dispatch, blockchain.requestRandom]);
 
