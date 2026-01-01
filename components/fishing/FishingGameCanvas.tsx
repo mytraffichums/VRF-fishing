@@ -61,9 +61,9 @@ export function FishingGameCanvas() {
       setIsHolding(true);
 
       if (state.state === "idle") {
-        // Check if player has enough balance to stake
-        if (state.balance < state.stake) {
-          return; // Can't cast without enough balance
+        // On-chain mode: block if not enough balance
+        if (!isPracticeMode && state.balance < state.stake) {
+          return; // Can't cast without enough balance in on-chain mode
         }
         // Start casting - NO blockchain call yet!
         dispatch({ type: "START_CAST" });
@@ -81,7 +81,7 @@ export function FishingGameCanvas() {
         requestedRandomRef.current = false;
       }
     },
-    [state.state, state.resultTimer, dispatch, blockchain]
+    [state.state, state.resultTimer, state.balance, state.stake, isPracticeMode, dispatch, blockchain]
   );
 
   // Handle input end

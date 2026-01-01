@@ -183,8 +183,8 @@ function gameReducer(state: GameStateData, action: GameAction): GameStateData {
 
     case "START_REELING": {
       if (state.state !== "bite") return state;
-      // Deduct stake when player commits to reeling (can't cancel after this)
-      const newBalance = state.balance - state.stake;
+      // Deduct stake when player commits to reeling (only in on-chain mode)
+      const newBalance = state.isPracticeMode ? state.balance : state.balance - state.stake;
       // Initialize fish fight timer (matching reference: 500 + random 0-1000ms)
       const initialFightTimer =
         GAMEPLAY.FISH_FIGHT_INITIAL_MIN +
@@ -350,9 +350,9 @@ function gameReducer(state: GameStateData, action: GameAction): GameStateData {
           lastPayout: 0, // Lost stake
         };
       }
-      // Calculate payout based on fish rarity
+      // Calculate payout based on fish rarity (only in on-chain mode)
       const multiplier = PAYOUT_MULTIPLIERS[fishData.rarity];
-      const payout = Math.floor(state.stake * multiplier);
+      const payout = state.isPracticeMode ? 0 : Math.floor(state.stake * multiplier);
       const caughtFish: CaughtFish = {
         ...fishData,
         timestamp: Date.now(),
@@ -366,8 +366,8 @@ function gameReducer(state: GameStateData, action: GameAction): GameStateData {
         catches: [caughtFish, ...state.catches],
         resultTimer: TIMING.CAUGHT_DISPLAY_MS,
         caughtFishY: GAME_HEIGHT + 100,
-        balance: state.balance + payout,
-        lastPayout: payout,
+        balance: state.isPracticeMode ? state.balance : state.balance + payout,
+        lastPayout: state.isPracticeMode ? null : payout,
       };
     }
 
