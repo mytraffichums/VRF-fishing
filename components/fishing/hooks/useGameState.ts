@@ -253,9 +253,12 @@ function gameReducer(state: GameStateData, action: GameAction): GameStateData {
         bobberX = Math.sin(time / 1000) * 5;
       }
 
-      // Update tension and progress based on input (matching reference exactly)
+      // Track previous tension to limit change rate (prevents spam click spikes)
+      const prevTension = tension;
+
+      // Update tension and progress based on input
       if (action.isHolding) {
-        // Holding: tension += dt/18, progress += dt/80
+        // Holding: tension += dt/18, progress += dt/56
         tension += dt / GAMEPLAY.TENSION_HOLD_DIVISOR;
         progress += dt / GAMEPLAY.PROGRESS_HOLD_DIVISOR;
         bobberDistance -= dt / GAMEPLAY.BOBBER_PULL_DIVISOR;
@@ -275,6 +278,13 @@ function gameReducer(state: GameStateData, action: GameAction): GameStateData {
       // Add extra tension when fish is fighting
       if (fishIsFighting) {
         tension += (dt / GAMEPLAY.TENSION_FIGHT_DIVISOR) * fishFightIntensity;
+      }
+
+      // Clamp tension change rate to prevent spam click spikes
+      const tensionDelta = tension - prevTension;
+      const maxChange = GAMEPLAY.TENSION_MAX_CHANGE_PER_FRAME;
+      if (Math.abs(tensionDelta) > maxChange) {
+        tension = prevTension + Math.sign(tensionDelta) * maxChange;
       }
 
       // Smooth rod angle

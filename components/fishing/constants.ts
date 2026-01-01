@@ -71,6 +71,7 @@ export const GAMEPLAY = {
   TENSION_FIGHT_DIVISOR: 25, // dt/25 * intensity when fighting
   TENSION_RELEASE_DIVISOR: 12, // dt/12 when releasing (normal)
   TENSION_RELEASE_FIGHT_DIVISOR: 6, // dt/6 when releasing (fighting)
+  TENSION_MAX_CHANGE_PER_FRAME: 2.5, // Max tension change per frame to prevent spam click spikes
 
   // Thresholds for tension colors
   TENSION_LOW_THRESHOLD: 40,
