@@ -6,18 +6,8 @@ import { WagmiProvider } from "@privy-io/wagmi";
 import { config, monadTestnet } from "@/lib/wagmi";
 import { useState } from "react";
 
-function getPrivyAppId(): string {
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
-  if (!appId) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_PRIVY_APP_ID environment variable. " +
-      "Please add it to your .env.local file."
-    );
-  }
-  return appId;
-}
-
-const privyAppId = getPrivyAppId();
+// Use placeholder during build, actual value at runtime
+const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "placeholder";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
